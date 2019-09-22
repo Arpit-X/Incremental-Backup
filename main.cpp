@@ -167,7 +167,7 @@ void printFile(string filename, int timestamp) {
             cout << endl;
         }
         else{
-            cout << "No data found at"<< timestamp << endl;
+            cout << "No data found at time: "<< timestamp << endl;
         }
     }
 
@@ -253,13 +253,20 @@ void incrementalBackup(string filename, int timestamp, vector<Instruction> instr
     }
 }
 int main() {
+    // Full backup and print file test
     fullBackup("f1", 1, "this is the file");
     printFile("f1", 5);
     fullBackup("f2", 3, "I am Iron Man");
-    printFile("f3", 3);
     printFile("f2", 3);
+
+    // Giving a file which does not exist
+    printFile("f3", 3);
+
+    // More than one full back ups
     fullBackup("f1", 4, "this is the new file");
     printFile("f1", 4);
+
+    // Incremental backup
     vector<Instruction> instructions;
     instructions.push_back({DELETE, 1, "\0"});
     incrementalBackup("f1", 2, instructions);
@@ -269,5 +276,20 @@ int main() {
     instructions.push_back({ALTER, 2, "CHANGED!"});
     incrementalBackup("f2", 4, instructions);
     printFile("f2",5);
+
+    // Testing block numbers change after a block is deleted
+    instructions.clear();
+    instructions.push_back({ALTER, 1, "-FIRST--"});
+    incrementalBackup("f1", 3, instructions);
+    printFile("f1",3);
+
+    // Incremental backup on second full backup of a file
+    instructions.clear();
+    instructions.push_back({APPEND, -1, "NewBlock"});
+    incrementalBackup("f1", 5, instructions);
+    printFile("f2",6);
+
+    //Retrieving file at time when it wasn't created
+    printFile("f2", 2);
     return 0;
 }
